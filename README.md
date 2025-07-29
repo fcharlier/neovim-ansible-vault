@@ -2,6 +2,16 @@
 
 A specialized Neovim plugin for working with Ansible Vault encrypted content. Encrypt, decrypt, and manage vault content directly within Neovim with seamless integration.
 
+## ⚠️ Important Warning
+
+**This plugin has not been thoroughly tested and may lead to data corruption or loss of encrypted content.**
+
+Please:
+- **Always backup your vault files** before using this plugin
+- **Test thoroughly** in non-production environments first
+- **Use with caution** on important data
+- Report any issues on the GitHub repository
+
 ## Features
 
 - **Encrypt/Decrypt selections** - Work with specific parts of files
@@ -15,12 +25,12 @@ A specialized Neovim plugin for working with Ansible Vault encrypted content. En
 
 ### Using vim-plug
 ```vim
-Plug 'your-username/neovim-ansible-vault'
+Plug 'fcharlier/neovim-ansible-vault'
 ```
 
 ### Using packer.nvim
 ```lua
-use 'your-username/neovim-ansible-vault'
+use 'fcharlier/neovim-ansible-vault'
 ```
 
 ### Using lazy.nvim
@@ -28,12 +38,12 @@ use 'your-username/neovim-ansible-vault'
 #### From GitHub
 ```lua
 {
-  'your-username/neovim-ansible-vault',
+  'fcharlier/neovim-ansible-vault',
   ft = { 'yaml', 'yaml.ansible', 'ansible-vault' }, -- Load for YAML, Ansible YAML and vault files
   config = function()
     -- Optional configuration
     vim.g.ansible_vault_password_file = '~/.ansible/vault_pass'
-    vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
+    -- or - vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
   end,
 }
 ```
@@ -47,7 +57,7 @@ use 'your-username/neovim-ansible-vault'
   config = function()
     -- Optional configuration
     vim.g.ansible_vault_password_file = '~/.ansible/vault_pass'
-    vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
+    -- or - vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
   end,
 }
 ```
@@ -55,7 +65,7 @@ use 'your-username/neovim-ansible-vault'
 ### Manual Installation
 Clone this repository into your Neovim configuration directory:
 ```bash
-git clone https://github.com/your-username/neovim-ansible-vault.git ~/.config/nvim/pack/plugins/start/neovim-ansible-vault
+git clone https://github.com/fcharlier/neovim-ansible-vault.git ~/.config/nvim/pack/plugins/start/neovim-ansible-vault
 ```
 
 ## Configuration
@@ -79,6 +89,11 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 ```
 
 ## Usage
+> **Highlight:**
+> The key feature of this plugin is the `<leader>vc` mapping, which *toggles encryption or decryption* of the YAML value or structure under the cursor.
+>
+> - Place your cursor on a YAML value or block and press `<leader>vc` in normal mode to automatically encrypt or decrypt that value, depending on its current state.
+> - This makes it effortless to work with Ansible Vault in YAML files—no need to select text or run manual commands!
 
 ### Commands
 
@@ -316,6 +331,10 @@ let g:ansible_vault_identity = 'prod@~/.ansible/prod_pass'
 " Or use the prompt commands for per-operation vault ID selection
 :VaultEncryptPrompt
 ```
+
+## Development
+
+This plugin was developed using [Cursor](https://cursor.sh/) with [Claude](https://claude.ai/) AI assistance.
 
 ## License
 
