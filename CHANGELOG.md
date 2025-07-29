@@ -7,6 +7,12 @@
   - Fixed `encrypt_on_save()` to use file-based encryption instead of stdin/stdout
   - File is now properly encrypted in place and reloaded
   - Auto-command is properly cleaned up after encryption
+- **CRITICAL: Fixed <leader>vc and all decrypt operations**
+  - Fixed stdin issue in `execute_vault_command` that broke all decrypt functions
+  - Replaced `jobstart` with `vim.fn.system()` for proper stdin/stdout handling
+  - Fixed: `M.decrypt()`, `M.decrypt_prompt()`, `M.decrypt_operator()`, `M.decrypt_yaml_value()`
+  - Fixed: `M.encrypt()`, `M.encrypt_operator()`
+  - Cursor-based operations (`<leader>vc`) now work correctly again
 
 ### Changed
 - **VaultEditFile behavior: save-triggered encryption**

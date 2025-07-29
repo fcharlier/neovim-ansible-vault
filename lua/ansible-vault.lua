@@ -570,13 +570,19 @@ function M.encrypt(line1, line2)
     }, false, {})
   end
 
-  local output = execute_vault_command('encrypt', content)
+  -- Use vim.fn.system to avoid stdin issues
+  local vault_cmd = build_vault_command('encrypt')
+  local output = vim.fn.system(vault_cmd, content)
+  local exit_code = vim.v.shell_error
 
-  if output then
+  if exit_code == 0 and output and output ~= '' then
     replace_range(line1, line2, output)
     vim.api.nvim_echo({{'Text encrypted successfully!', 'Normal'}}, true, {})
   else
-    vim.api.nvim_echo({{'Encryption failed! Check error messages above.', 'ErrorMsg'}}, true, {})
+    vim.api.nvim_echo({
+      {'Encryption failed! Exit code: ' .. exit_code, 'ErrorMsg'},
+      {'\nOutput: ' .. (output or 'none'), 'ErrorMsg'}
+    }, true, {})
   end
 end
 
@@ -602,13 +608,19 @@ function M.decrypt(line1, line2)
     return
   end
 
-  local output = execute_vault_command('decrypt', content)
+  -- Use vim.fn.system to avoid stdin issues
+  local vault_cmd = build_vault_command('decrypt')
+  local output = vim.fn.system(vault_cmd, content)
+  local exit_code = vim.v.shell_error
 
-  if output then
+  if exit_code == 0 and output and output ~= '' then
     replace_range(line1, line2, output)
     vim.api.nvim_echo({{'Text decrypted successfully!', 'Normal'}}, true, {})
   else
-    vim.api.nvim_echo({{'Decryption failed! Check error messages above.', 'ErrorMsg'}}, true, {})
+    vim.api.nvim_echo({
+      {'Decryption failed! Exit code: ' .. exit_code, 'ErrorMsg'},
+      {'\nOutput: ' .. (output or 'none'), 'ErrorMsg'}
+    }, true, {})
   end
 end
 
@@ -845,11 +857,19 @@ function M.decrypt_prompt(line1, line2)
     return
   end
 
-  local output = execute_vault_command('decrypt', content, extra_args)
+  -- Use vim.fn.system to avoid stdin issues
+  local vault_cmd = build_vault_command('decrypt', extra_args)
+  local output = vim.fn.system(vault_cmd, content)
+  local exit_code = vim.v.shell_error
 
-  if output then
+  if exit_code == 0 and output and output ~= '' then
     replace_range(line1, line2, output)
     vim.api.nvim_echo({{'Text decrypted successfully!', 'Normal'}}, false, {})
+  else
+    vim.api.nvim_echo({
+      {'Decryption failed! Exit code: ' .. exit_code, 'ErrorMsg'},
+      {'\nOutput: ' .. (output or 'none'), 'ErrorMsg'}
+    }, true, {})
   end
 end
 
@@ -861,11 +881,19 @@ function M.encrypt_operator(start_line, end_line, content)
     return
   end
 
-  local output = execute_vault_command('encrypt', content)
+  -- Use vim.fn.system to avoid stdin issues
+  local vault_cmd = build_vault_command('encrypt')
+  local output = vim.fn.system(vault_cmd, content)
+  local exit_code = vim.v.shell_error
 
-  if output then
+  if exit_code == 0 and output and output ~= '' then
     replace_range(start_line, end_line, output)
     vim.api.nvim_echo({{'Text encrypted successfully!', 'Normal'}}, false, {})
+  else
+    vim.api.nvim_echo({
+      {'Encryption failed! Exit code: ' .. exit_code, 'ErrorMsg'},
+      {'\nOutput: ' .. (output or 'none'), 'ErrorMsg'}
+    }, true, {})
   end
 end
 
@@ -876,11 +904,19 @@ function M.decrypt_operator(start_line, end_line, content)
     return
   end
 
-  local output = execute_vault_command('decrypt', content)
+  -- Use vim.fn.system to avoid stdin issues
+  local vault_cmd = build_vault_command('decrypt')
+  local output = vim.fn.system(vault_cmd, content)
+  local exit_code = vim.v.shell_error
 
-  if output then
+  if exit_code == 0 and output and output ~= '' then
     replace_range(start_line, end_line, output)
     vim.api.nvim_echo({{'Text decrypted successfully!', 'Normal'}}, false, {})
+  else
+    vim.api.nvim_echo({
+      {'Decryption failed! Exit code: ' .. exit_code, 'ErrorMsg'},
+      {'\nOutput: ' .. (output or 'none'), 'ErrorMsg'}
+    }, true, {})
   end
 end
 
@@ -1020,8 +1056,24 @@ function M.decrypt_yaml_value(line1, line2)
     }, false, {})
   end
 
-  -- Decrypt only the value
-  local decrypted_value = execute_vault_command('decrypt', parsed.value)
+  -- Decrypt only the value using vim.fn.system to avoid stdin issues
+  local vault_cmd = build_vault_command('decrypt')
+
+  if M.debug_mode then
+    debug_log('decrypt_yaml_value: Running command: ' .. vault_cmd)
+    debug_log('decrypt_yaml_value: Input length: ' .. string.len(parsed.value))
+  end
+
+  local decrypted_value = vim.fn.system(vault_cmd, parsed.value)
+  local exit_code = vim.v.shell_error
+
+  if exit_code ~= 0 then
+    vim.api.nvim_echo({
+      {'Error: Failed to decrypt value. Exit code: ' .. exit_code, 'ErrorMsg'},
+      {'\nOutput: ' .. (decrypted_value or 'none'), 'ErrorMsg'}
+    }, true, {})
+    return
+  end
 
       if decrypted_value then
     -- Reconstruct the line with decrypted value
