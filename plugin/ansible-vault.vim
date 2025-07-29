@@ -23,7 +23,7 @@ endif
 " Main ansible-vault commands
 command! -range VaultEncrypt call luaeval('require("ansible-vault").encrypt(_A)', [<line1>, <line2>])
 command! -range VaultDecrypt call luaeval('require("ansible-vault").decrypt(_A)', [<line1>, <line2>])
-command! -range VaultView call luaeval('require("ansible-vault").view(_A)', [<line1>, <line2>])
+
 command! VaultEncryptFile call luaeval('require("ansible-vault").encrypt_file()')
 command! VaultDecryptFile call luaeval('require("ansible-vault").decrypt_file()')
 command! VaultEditFile call luaeval('require("ansible-vault").edit_file()')
@@ -76,7 +76,7 @@ if !exists('g:ansible_vault_no_mappings') || !g:ansible_vault_no_mappings
   " Global mappings for ansible-vault operations
   vnoremap <leader>ve :VaultEncryptSmart<CR>
   vnoremap <leader>vd :VaultDecryptSmart<CR>
-  vnoremap <leader>vv :VaultView<CR>
+
   nnoremap <leader>vE :VaultEncryptFile<CR>
   nnoremap <leader>vD :VaultDecryptFile<CR>
   nnoremap <leader>vF :VaultEditFile<CR>

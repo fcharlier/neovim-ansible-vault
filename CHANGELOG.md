@@ -57,7 +57,7 @@
 - Complete Ansible Vault integration for Neovim
 - Support for encrypt/decrypt operations on selections and ranges
 - Full file encryption/decryption commands
-- Vault viewing (read-only decrypt) functionality
+
 - Interactive editing mode with auto-encrypt on save
 - Vault file rekeying support
 - Configurable password files and vault identities
@@ -68,7 +68,7 @@
 ### Features
 - `:VaultEncrypt` - Encrypt selection or range
 - `:VaultDecrypt` - Decrypt selection or range
-- `:VaultView` - View decrypted content without modifying
+
 - `:VaultEncryptFile` - Encrypt entire file
 - `:VaultDecryptFile` - Decrypt entire file
 - `:VaultEditFile` - Safe editing with auto-encrypt on save
@@ -79,7 +79,7 @@
 ### Key Mappings
 - `<leader>ve` - Encrypt (visual mode & operator mode)
 - `<leader>vd` - Decrypt (visual mode & operator mode)
-- `<leader>vv` - View decrypted content
+
 - `<leader>vE` - Encrypt entire file
 - `<leader>vD` - Decrypt entire file
 - `<leader>vF` - Edit vault file safely

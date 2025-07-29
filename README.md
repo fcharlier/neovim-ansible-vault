@@ -86,7 +86,7 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 #### Selection/Range Commands
 - `:VaultEncrypt` - Encrypt selected text or range (full selection)
 - `:VaultDecrypt` - Decrypt selected text or range (full selection)
-- `:VaultView` - View decrypted content in new buffer (read-only)
+
 
 #### YAML-Aware Commands (NEW!)
 - `:VaultEncryptValue` - Encrypt only the value in YAML key-value pairs (uses `encrypt_string`)
@@ -116,7 +116,7 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 #### Visual Mode (selection-based)
 - `<leader>ve` - Smart encrypt (auto-encrypts YAML values, full selection for others)
 - `<leader>vd` - Smart decrypt (auto-decrypts YAML values, full selection for others)
-- `<leader>vv` - View decrypted selection
+
 
 #### YAML-Specific Visual Mode
 - `<leader>vev` - Encrypt YAML value only (uses `encrypt_string`, preserves key structure)
@@ -211,12 +211,7 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 " No manual selection needed - plugin finds the complete structure!
 ```
 
-#### 6. Viewing Vault Content
-```vim
-" Select encrypted content and view it decrypted
-:'<,'>VaultView
-" Opens in a new buffer showing decrypted content
-```
+
 
 #### 6. Using Vault IDs
 ```vim
@@ -257,14 +252,7 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 " 5. Press <leader>vef to re-encrypt
 ```
 
-### Quick Content Inspection
-```vim
-" To quickly peek at encrypted content:
-" 1. Select the encrypted text
-" 2. Press <leader>vv
-" 3. Content opens in new buffer for viewing
-" 4. Close when done - original remains encrypted
-```
+
 
 ## File Auto-Detection
 

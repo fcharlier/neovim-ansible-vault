@@ -71,7 +71,6 @@ end
 -- Execute ansible-vault command with input
 local function execute_vault_command(operation, input, extra_args)
   local temp_input = vim.fn.tempname()
-  local temp_output = vim.fn.tempname()
 
   -- Write input to temporary file
   local input_file = io.open(temp_input, 'w')
@@ -84,37 +83,57 @@ local function execute_vault_command(operation, input, extra_args)
 
   -- Build command
   local vault_cmd = build_vault_command(operation, extra_args)
-  local full_command = string.format('%s < %s > %s 2>&1', vault_cmd, temp_input, temp_output)
+  local cmd_args = vim.split(vault_cmd, ' ')
 
-  -- Execute command
-  local exit_code = os.execute(full_command)
-
-  -- Read output
-  local output_file = io.open(temp_output, 'r')
-  local output = ''
-  if output_file then
-    output = output_file:read('*all')
-    output_file:close()
+  if M.debug_mode then
+    debug_log('execute_vault_command: ' .. table.concat(cmd_args, ' ') .. ' < ' .. temp_input)
   end
 
-  -- Clean up temporary files
+  -- Use jobstart for proper I/O handling
+  local output_lines = {}
+  local error_lines = {}
+  local job_id = vim.fn.jobstart(cmd_args, {
+    stdin = temp_input,
+    stdout_buffered = true,
+    stderr_buffered = true,
+    on_stdout = function(_, data)
+      if data then
+        vim.list_extend(output_lines, data)
+      end
+    end,
+    on_stderr = function(_, data)
+      if data then
+        vim.list_extend(error_lines, data)
+      end
+    end,
+  })
+
+  -- Wait for job to complete
+  local exit_code = vim.fn.jobwait({job_id}, 30000)[1] -- 30 second timeout
+
+  -- Clean up temporary file
   os.remove(temp_input)
-  os.remove(temp_output)
 
   -- Check if command succeeded
-  if exit_code ~= 0 and exit_code ~= true then
-    local error_msg = 'ansible-vault ' .. operation .. ' failed\nOutput: ' .. output
+  if exit_code ~= 0 then
+    local error_output = table.concat(error_lines, '\n')
+    local error_msg = 'ansible-vault ' .. operation .. ' failed\nOutput: ' .. error_output
     vim.api.nvim_err_writeln(error_msg)
-    -- Also echo the error with a longer display time
     vim.api.nvim_echo({
       {'ansible-vault ' .. operation .. ' failed!', 'ErrorMsg'},
-      {'\nOutput: ' .. output, 'ErrorMsg'}
+      {'\nOutput: ' .. error_output, 'ErrorMsg'}
     }, true, {})
     return nil
   end
 
+  local output = table.concat(output_lines, '\n')
+
   -- Remove trailing newline if present
   output = output:gsub('\n$', '')
+
+  if M.debug_mode then
+    debug_log('execute_vault_command success: ' .. (output:sub(1, 100) or '(no output)'))
+  end
 
   return output
 end
@@ -590,37 +609,6 @@ function M.decrypt(line1, line2)
     vim.api.nvim_echo({{'Text decrypted successfully!', 'Normal'}}, true, {})
   else
     vim.api.nvim_echo({{'Decryption failed! Check error messages above.', 'ErrorMsg'}}, true, {})
-  end
-end
-
--- View (decrypt without replacing) selection or range
-function M.view(line1, line2)
-  local content
-  if line1 and line2 then
-    content = get_range_content(line1, line2)
-  else
-    content = get_visual_selection()
-  end
-
-  if content == '' then
-    vim.api.nvim_err_writeln('Error: No text selected')
-    return
-  end
-
-  -- Check if content is actually encrypted
-  if is_plain_text(content) then
-    vim.api.nvim_err_writeln('Error: Content is not vault encrypted')
-    return
-  end
-
-  local output = execute_vault_command('view', content)
-
-  if output then
-    -- Display in a new scratch buffer
-    vim.cmd('new')
-    vim.cmd('setlocal buftype=nofile bufhidden=wipe noswapfile')
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(output, '\n'))
-    vim.api.nvim_echo({{'Vault content displayed in new buffer', 'Normal'}}, false, {})
   end
 end
 
