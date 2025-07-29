@@ -44,6 +44,11 @@ augroup AnsibleVault
   " Detect by common ansible directories
   autocmd BufRead,BufNewFile */vars/*.yml,*/vars/*.yaml,*/group_vars/*,*/host_vars/*,*/inventory/*
     \ setlocal filetype=ansible-vault
+  " Handle yaml.ansible filetype for vault operations
+  autocmd FileType yaml.ansible
+    \ if getline(1) =~# '^\$ANSIBLE_VAULT' |
+    \   setlocal filetype=ansible-vault |
+    \ endif
 augroup END
 
 " Default key mappings (can be overridden by user)
@@ -112,6 +117,10 @@ endfunction
 " Additional file type specific mappings
 autocmd FileType ansible-vault nnoremap <buffer> <leader>vf :VaultEditFile<CR>
 autocmd FileType ansible-vault nnoremap <buffer> <leader>vs :VaultEncryptFile<CR>
+
+" Mappings for yaml.ansible filetype
+autocmd FileType yaml.ansible nnoremap <buffer> <leader>vf :VaultEditFile<CR>
+autocmd FileType yaml.ansible nnoremap <buffer> <leader>vs :VaultEncryptFile<CR>
 
 " Restore cpo setting
 let &cpo = s:save_cpo

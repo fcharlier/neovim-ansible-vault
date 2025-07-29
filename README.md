@@ -30,7 +30,7 @@ use 'your-username/neovim-ansible-vault'
 ```lua
 {
   'your-username/neovim-ansible-vault',
-  ft = { 'yaml', 'ansible-vault' }, -- Load only for YAML and vault files
+  ft = { 'yaml', 'yaml.ansible', 'ansible-vault' }, -- Load for YAML, Ansible YAML and vault files
   config = function()
     -- Optional configuration
     vim.g.ansible_vault_password_file = '~/.ansible/vault_pass'
@@ -44,7 +44,7 @@ use 'your-username/neovim-ansible-vault'
 {
   dir = '~/path/to/neovim-ansible-vault', -- Local filesystem path
   name = 'neovim-ansible-vault',
-  ft = { 'yaml', 'ansible-vault' },
+  ft = { 'yaml', 'yaml.ansible', 'ansible-vault' },
   config = function()
     -- Optional configuration
     vim.g.ansible_vault_password_file = '~/.ansible/vault_pass'
@@ -204,6 +204,7 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 The plugin automatically detects Ansible vault files based on:
 - Files starting with `$ANSIBLE_VAULT`
 - Files in common Ansible directories: `*/vars/*`, `*/group_vars/*`, `*/host_vars/*`, `*/inventory/*`
+- Files with `yaml.ansible` filetype that contain vault content
 
 ## Error Handling
 

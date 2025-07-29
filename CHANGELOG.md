@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.1] - 2024-12-29
+
+### Added
+- Support for `yaml.ansible` filetype detection and auto-loading
+- File type specific mappings for `yaml.ansible` files
+- Updated lazy.nvim configuration to include `yaml.ansible`
+
+### Changed
+- Enhanced auto-detection to work with `yaml.ansible` filetype
+- Updated documentation to reflect new filetype support
+
 ## [1.0.0] - 2024-12-29
 
 ### Added
