@@ -1,0 +1,25 @@
+# Example Ansible vault content for testing
+# This file demonstrates how to use the ansible-vault plugin
+
+---
+# Plain text section
+database_host: "db.example.com"
+database_port: 5432
+
+# This section below should be encrypted with ansible-vault
+# Select the lines and use <leader>ve to encrypt them
+database_username: "admin"
+database_password: "super_secret_password"
+api_key: "abc123xyz789"
+
+# Mixed content file - you can encrypt only sensitive parts
+app_name: "my-app"
+app_version: "1.0.0"
+
+# To test the plugin:
+# 1. Select the sensitive lines above (database_username, database_password, api_key)
+# 2. Press <leader>ve to encrypt them
+# 3. Use <leader>vd to decrypt them back
+# 4. Use <leader>vv to view encrypted content without modifying the file
+# 5. Use :VaultEncryptFile to encrypt the entire file
+# 6. Use :VaultEditFile to safely edit encrypted files
