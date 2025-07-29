@@ -27,6 +27,7 @@ command! -range VaultDecrypt call luaeval('require("ansible-vault").decrypt(_A)'
 command! VaultEncryptFile call luaeval('require("ansible-vault").encrypt_file()')
 command! VaultDecryptFile call luaeval('require("ansible-vault").decrypt_file()')
 command! VaultEditFile call luaeval('require("ansible-vault").edit_file()')
+command! VaultStopAutoEncrypt call luaeval('require("ansible-vault").stop_auto_encrypt()')
 command! VaultRekey call luaeval('require("ansible-vault").rekey_file()')
 
 " Interactive commands that prompt for options

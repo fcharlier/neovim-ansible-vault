@@ -697,20 +697,76 @@ function M.edit_file()
   vim.cmd([[
     augroup AnsibleVaultEdit
       autocmd! * <buffer>
-      autocmd BufWritePre <buffer> lua require('ansible-vault').encrypt_on_save()
+      autocmd BufWriteCmd <buffer> lua require('ansible-vault').encrypt_on_save()
     augroup END
   ]])
 
-  vim.api.nvim_echo({{'File decrypted for editing. Will auto-encrypt on save.', 'Normal'}}, false, {})
+  vim.api.nvim_echo({{'Buffer decrypted for editing. :w will encrypt to disk (buffer stays decrypted).', 'Normal'}}, false, {})
 end
 
 -- Auto-encrypt on save (used by edit_file)
 function M.encrypt_on_save()
-  local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n')
-  local output = execute_vault_command('encrypt', content)
+  local filepath = vim.fn.expand('%:p')
+  if filepath == '' then
+    vim.api.nvim_err_writeln('Error: No file loaded for encryption')
+    return
+  end
 
-  if output then
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(output, '\n'))
+  -- Get current decrypted buffer content
+  local buffer_content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local content_to_encrypt = table.concat(buffer_content, '\n')
+
+  if M.debug_mode then
+    debug_log('encrypt_on_save: Encrypting ' .. string.len(content_to_encrypt) .. ' chars to ' .. filepath)
+  end
+
+  -- Build vault command for encryption
+  local vault_cmd = build_vault_command('encrypt')
+
+  if M.debug_mode then
+    debug_log('encrypt_on_save: Running command: ' .. vault_cmd)
+  end
+
+  -- Use vim.fn.system() with input to handle stdin properly
+  local encrypted_output = vim.fn.system(vault_cmd, content_to_encrypt)
+  local exit_code = vim.v.shell_error
+
+  if exit_code == 0 and encrypted_output and encrypted_output ~= '' then
+    -- Write encrypted content directly to file
+    local file_handle = io.open(filepath, 'w')
+    if file_handle then
+      file_handle:write(encrypted_output)
+      file_handle:close()
+
+      -- Restore decrypted content to buffer (keep editing decrypted)
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, buffer_content)
+      -- Mark buffer as unmodified since we just "saved" it
+      vim.bo.modified = false
+
+      vim.api.nvim_echo({{'File encrypted to disk (buffer remains decrypted)', 'Normal'}}, false, {})
+
+      if M.debug_mode then
+        debug_log('File successfully encrypted on disk, buffer kept decrypted')
+      end
+    else
+      vim.api.nvim_err_writeln('Error: Could not write encrypted file')
+    end
+  else
+    vim.api.nvim_err_writeln('Error: Failed to encrypt content. Exit code: ' .. exit_code .. ', Output: ' .. (encrypted_output or 'none'))
+  end
+end
+
+-- Stop auto-encryption for current buffer
+function M.stop_auto_encrypt()
+  vim.cmd([[
+    augroup AnsibleVaultEdit
+      autocmd! * <buffer>
+    augroup END
+  ]])
+  vim.api.nvim_echo({{'Auto-encryption stopped for this buffer', 'Normal'}}, false, {})
+
+  if M.debug_mode then
+    debug_log('Auto-encryption disabled for buffer')
   end
 end
 

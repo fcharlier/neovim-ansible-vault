@@ -6,7 +6,6 @@ A specialized Neovim plugin for working with Ansible Vault encrypted content. En
 
 - **Encrypt/Decrypt selections** - Work with specific parts of files
 - **Full file operations** - Encrypt, decrypt, and rekey entire files
-- **Vault viewing** - Preview encrypted content without modifying
 - **Interactive editing** - Edit vault files with auto-encrypt on save
 - **Configurable authentication** - Support for password files and vault IDs
 - **Auto-detection** - Automatically detect Ansible vault files
@@ -104,7 +103,8 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 #### File Commands
 - `:VaultEncryptFile` - Encrypt entire current file
 - `:VaultDecryptFile` - Decrypt entire current file
-- `:VaultEditFile` - Edit vault file (decrypt for editing, auto-encrypt on save)
+- `:VaultEditFile` - Edit vault file (decrypts buffer, encrypts to disk only on :w)
+- `:VaultStopAutoEncrypt` - Stop auto-encryption for current buffer
 - `:VaultRekey` - Change vault password/key for current file
 
 #### Interactive Commands
@@ -160,7 +160,12 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 
 " Edit a vault file safely
 :VaultEditFile
-" Make your changes, then save - it will auto-encrypt
+" Buffer shows decrypted content, file on disk stays encrypted
+" Edit normally, then save when ready to encrypt to disk:
+:w
+" Buffer stays decrypted, file gets encrypted on disk
+" When done editing:
+:VaultStopAutoEncrypt
 ```
 
 #### 3. Working with Text Objects

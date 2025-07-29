@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.1] - 2024-12-29
+
+### Fixed
+- **CRITICAL: VaultEditFile now correctly saves files encrypted**
+  - Fixed `encrypt_on_save()` to use file-based encryption instead of stdin/stdout
+  - File is now properly encrypted in place and reloaded
+  - Auto-command is properly cleaned up after encryption
+
+### Changed
+- **VaultEditFile behavior: save-triggered encryption**
+  - `:VaultEditFile` decrypts buffer content while file stays encrypted on disk
+  - `:w` encrypts current buffer content to disk but keeps buffer decrypted
+  - No continuous auto-encryption - only encrypts when explicitly saving
+  - Perfect for controlled editing with security when ready
+  - Added `:VaultStopAutoEncrypt` to stop save-triggered encryption
+
 ## [1.1.0] - 2024-12-29
 
 ### Added
