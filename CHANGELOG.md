@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.1] - 2024-12-29
+## [1.1.1] - 2025-07-29
 
 ### Fixed
 - **CRITICAL: VaultEditFile now correctly saves files encrypted**
@@ -22,7 +22,7 @@
   - Perfect for controlled editing with security when ready
   - Added `:VaultStopAutoEncrypt` to stop save-triggered encryption
 
-## [1.1.0] - 2024-12-29
+## [1.1.0] - 2025-07-29
 
 ### Added
 - **YAML-aware encryption/decryption** - Smart handling of key-value pairs
@@ -37,7 +37,7 @@
 - Added `<leader>vev` / `<leader>vdv` for YAML value-only operations
 - Added `<leader>vef` / `<leader>vdf` for full-selection operations
 
-## [1.0.3] - 2024-12-29
+## [1.0.3] - 2025-07-29
 
 ### Fixed
 - Fixed "vault-ids default,default available" error by properly specifying --encrypt-vault-id
@@ -51,7 +51,7 @@
 - Debug test file for troubleshooting
 - Documentation for vault ID configuration issues
 
-## [1.0.2] - 2024-12-29
+## [1.0.2] - 2025-07-29
 
 ### Fixed
 - Fixed visual mode error when trying to decrypt non-encrypted content
@@ -62,7 +62,7 @@
 - Content validation functions to check if text is vault-encrypted
 - Proper error handling for mismatched operations
 
-## [1.0.1] - 2024-12-29
+## [1.0.1] - 2025-07-29
 
 ### Added
 - Support for `yaml.ansible` filetype detection and auto-loading
@@ -73,7 +73,7 @@
 - Enhanced auto-detection to work with `yaml.ansible` filetype
 - Updated documentation to reflect new filetype support
 
-## [1.0.0] - 2024-12-29
+## [1.0.0] - 2025-07-29
 
 ### Added
 - Complete Ansible Vault integration for Neovim
