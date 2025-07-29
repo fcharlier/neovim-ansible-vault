@@ -208,16 +208,45 @@ end
 -- Execute ansible-vault command on a file
 local function execute_vault_file_command(operation, filepath, extra_args)
   local vault_cmd = build_vault_command(operation, extra_args)
-  local full_command = vault_cmd .. ' ' .. filepath
+  local cmd_args = vim.split(vault_cmd, ' ')
+  table.insert(cmd_args, filepath)
 
-  local handle = io.popen(full_command .. ' 2>&1')
-  local output = handle:read('*all')
-  local success, _, exit_code = handle:close()
+  if M.debug_mode then
+    debug_log('execute_vault_file_command: ' .. table.concat(cmd_args, ' '))
+  end
 
-  if not success or exit_code ~= 0 then
-    vim.api.nvim_err_writeln('ansible-vault ' .. operation .. ' failed on file: ' .. filepath)
-    vim.api.nvim_err_writeln('Output: ' .. output)
+  -- Use vim.fn.jobstart() for proper I/O handling
+  local output = {}
+  local job_id = vim.fn.jobstart(cmd_args, {
+    stdout_buffered = true,
+    stderr_buffered = true,
+    on_stdout = function(_, data)
+      if data then
+        vim.list_extend(output, data)
+      end
+    end,
+    on_stderr = function(_, data)
+      if data then
+        vim.list_extend(output, data)
+      end
+    end,
+  })
+
+  -- Wait for job to complete
+  local exit_code = vim.fn.jobwait({job_id}, 30000)[1] -- 30 second timeout
+
+  if exit_code ~= 0 then
+    local output_str = table.concat(output, '\n')
+    vim.api.nvim_echo({
+      {'ansible-vault ' .. operation .. ' failed on file: ' .. filepath, 'ErrorMsg'},
+      {'\nOutput: ' .. output_str, 'ErrorMsg'}
+    }, true, {})
     return false
+  end
+
+  if M.debug_mode then
+    local output_str = table.concat(output, '\n')
+    debug_log('execute_vault_file_command success: ' .. (output_str or '(no output)'))
   end
 
   return true
@@ -634,16 +663,44 @@ function M.edit_file()
     return
   end
 
-  -- Create a temporary decrypted version
-  local vault_cmd = build_vault_command('view', filepath)
-  local handle = io.popen(vault_cmd)
-  local content = handle:read('*all')
-  local success, _, exit_code = handle:close()
+    -- Create a temporary decrypted version using jobstart for proper I/O
+  local vault_cmd = build_vault_command('view')
+  local cmd_args = vim.split(vault_cmd, ' ')
+  table.insert(cmd_args, filepath)
 
-  if not success or exit_code ~= 0 then
-    vim.api.nvim_err_writeln('Failed to decrypt file for editing')
+  if M.debug_mode then
+    debug_log('edit_file: ' .. table.concat(cmd_args, ' '))
+  end
+
+  local content_lines = {}
+  local error_lines = {}
+  local job_id = vim.fn.jobstart(cmd_args, {
+    stdout_buffered = true,
+    stderr_buffered = true,
+    on_stdout = function(_, data)
+      if data then
+        vim.list_extend(content_lines, data)
+      end
+    end,
+    on_stderr = function(_, data)
+      if data then
+        vim.list_extend(error_lines, data)
+      end
+    end,
+  })
+
+  local exit_code = vim.fn.jobwait({job_id}, 30000)[1]
+
+  if exit_code ~= 0 then
+    local error_output = table.concat(error_lines, '\n')
+    vim.api.nvim_echo({
+      {'ansible-vault view failed on file: ' .. filepath, 'ErrorMsg'},
+      {'\nOutput: ' .. error_output, 'ErrorMsg'}
+    }, true, {})
     return
   end
+
+  local content = table.concat(content_lines, '\n')
 
   -- Replace buffer content with decrypted version
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(content, '\n'))
