@@ -1,0 +1,66 @@
+# YAML-aware encryption test file
+
+---
+# Test various YAML key-value formats
+
+# Simple unquoted values
+database_host: db.example.com
+database_port: 5432
+
+# Quoted values
+database_user: "admin"
+database_password: 'super_secret_password'
+
+# Values with special characters
+api_key: "abc123-xyz789"
+secret_token: contains:colons:and spaces
+
+# Values with comments
+redis_host: |
+  $ANSIBLE_VAULT;1.1;AES256
+  63636632636232636533626531343232373366653936343037353265376439663838323733616636
+  3739643339323934323835623661663966303730643864380a623963646634376132353639373936
+  38616365396132643333333832346435343463393030373933386633663666356338303161663337
+  6134366232653439370a366666383363643030396465633939393765396362663834346336326432
+  6332
+  # This is a comment
+redis_password: "secret123"  # Another comment
+
+# Complex values
+jwt_secret: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+
+# Instructions for testing YAML-aware functionality:
+#
+# 1. Smart encrypt/decrypt (auto-detects YAML, automatically encrypts values):
+#    - Select any key-value line above
+#    - Press <leader>ve (VaultEncryptSmart) - automatically encrypts just the value
+#    - Press <leader>vd (VaultDecryptSmart) - automatically decrypts just the value
+#
+# 2. YAML value-only operations:
+#    - Select a key-value line
+#    - Press <leader>vev to encrypt only the value (VaultEncryptValue)
+#    - Press <leader>vdv to decrypt only the value (VaultDecryptValue)
+#
+# 3. Full-line operations (original behavior):
+#    - Select a key-value line
+#    - Press <leader>vef to encrypt the entire selection (VaultEncrypt)
+#    - Press <leader>vdf to decrypt the entire selection (VaultDecrypt)
+#
+# 4. Cursor-based operations (no selection needed!):
+#    - Position cursor anywhere on a key-value line (even multi-line vault)
+#    - Press <leader>vc to auto-encrypt/decrypt (VaultSmartAtCursor)
+#    - Press <leader>vec to encrypt at cursor (VaultEncryptAtCursor)
+#    - Press <leader>vdc to decrypt at cursor (VaultDecryptAtCursor)
+#
+# 5. Override smart behavior with prompts:
+#    - Select a key-value line
+#    - Press <leader>vep to get encrypt choice prompt (VaultEncryptPromptChoice)
+#    - Press <leader>vdp to get decrypt choice prompt (VaultDecryptPromptChoice)
+#
+# The YAML-aware functions will:
+# - Parse the key: value structure
+# - Use ansible-vault encrypt_string for value-only encryption (more appropriate)
+# - Encrypt/decrypt only the value part
+# - Preserve the key, indentation, and comments
+# - Handle quoted and unquoted values correctly
+# - Automatically quote encrypted values (since they contain special chars)

@@ -1,0 +1,34 @@
+# Test file for debugging ansible-vault plugin
+---
+# Simple plain text to encrypt
+test_variable: "hello world"
+another_variable: "this is plain text"
+
+# Multi-line content
+description: |
+  This is a multi-line
+  text that can be used
+  to test encryption
+
+# Instructions:
+# 1. First run: :VaultToggleDebug to enable debug mode
+# 2. Select any plain text above (like the test_variable line)
+# 3. Press <leader>ve to encrypt it
+# 4. Check the debug messages to see what's happening
+# 5. If it fails, the error should now be visible longer
+
+# Common issues to check:
+# - Is ansible-vault installed? Run: ansible-vault --version
+# - Is the password file configured? Check: echo $ANSIBLE_VAULT_PASSWORD_FILE
+# - Are you selecting the text properly in visual mode?
+#
+# Vault ID configuration:
+# If you get "vault-ids default,default available" error:
+# 1. Set a specific vault identity:
+#    let g:ansible_vault_identity = 'prod@~/.ansible/vault_pass'
+# 2. Or use password file only:
+#    let g:ansible_vault_password_file = '~/.ansible/vault_pass'
+#    unlet g:ansible_vault_identity  " Remove identity if set
+# 3. Or use the interactive prompt with specific vault ID:
+#    :VaultEncryptPrompt
+

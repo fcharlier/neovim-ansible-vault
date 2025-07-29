@@ -1,5 +1,45 @@
 # Changelog
 
+## [1.1.0] - 2024-12-29
+
+### Added
+- **YAML-aware encryption/decryption** - Smart handling of key-value pairs
+- `:VaultEncryptValue` / `:VaultDecryptValue` - Encrypt/decrypt only YAML values
+- `:VaultEncryptSmart` / `:VaultDecryptSmart` - Auto-detect YAML with user prompt
+- New key mappings for YAML-specific operations
+- Enhanced YAML parsing with support for quoted/unquoted values and comments
+- Smart reconstruction of YAML lines preserving structure
+
+### Changed
+- Default `<leader>ve` and `<leader>vd` now use smart mode (auto-detects YAML)
+- Added `<leader>vev` / `<leader>vdv` for YAML value-only operations
+- Added `<leader>vef` / `<leader>vdf` for full-selection operations
+
+## [1.0.3] - 2024-12-29
+
+### Fixed
+- Fixed "vault-ids default,default available" error by properly specifying --encrypt-vault-id
+- Enhanced vault ID handling for encrypt operations
+- Interactive encrypt prompt now correctly handles vault IDs
+- Better error display with persistent messages
+
+### Added
+- Debug mode with :VaultToggleDebug command
+- Enhanced error handling with nvim_echo for better visibility
+- Debug test file for troubleshooting
+- Documentation for vault ID configuration issues
+
+## [1.0.2] - 2024-12-29
+
+### Fixed
+- Fixed visual mode error when trying to decrypt non-encrypted content
+- Added content validation for all encrypt/decrypt operations
+- Better error messages for invalid operations (encrypt already encrypted content, decrypt plain text)
+
+### Added
+- Content validation functions to check if text is vault-encrypted
+- Proper error handling for mismatched operations
+
 ## [1.0.1] - 2024-12-29
 
 ### Added

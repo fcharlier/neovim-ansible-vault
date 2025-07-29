@@ -84,9 +84,22 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 ### Commands
 
 #### Selection/Range Commands
-- `:VaultEncrypt` - Encrypt selected text or range
-- `:VaultDecrypt` - Decrypt selected text or range
+- `:VaultEncrypt` - Encrypt selected text or range (full selection)
+- `:VaultDecrypt` - Decrypt selected text or range (full selection)
 - `:VaultView` - View decrypted content in new buffer (read-only)
+
+#### YAML-Aware Commands (NEW!)
+- `:VaultEncryptValue` - Encrypt only the value in YAML key-value pairs (uses `encrypt_string`)
+- `:VaultDecryptValue` - Decrypt only the value in YAML key-value pairs
+- `:VaultEncryptSmart` - Auto-encrypt YAML values (uses `encrypt_string`), full selection for others
+- `:VaultDecryptSmart` - Auto-decrypt YAML values, full selection for others
+- `:VaultEncryptPromptChoice` - Prompt for encrypt preference (override smart behavior)
+- `:VaultDecryptPromptChoice` - Prompt for decrypt preference (override smart behavior)
+
+#### Cursor-Based Commands (NEW!)
+- `:VaultSmartAtCursor` - Auto-encrypt/decrypt YAML structure at cursor
+- `:VaultEncryptAtCursor` - Encrypt YAML structure at cursor
+- `:VaultDecryptAtCursor` - Decrypt YAML structure at cursor
 
 #### File Commands
 - `:VaultEncryptFile` - Encrypt entire current file
@@ -95,21 +108,34 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 - `:VaultRekey` - Change vault password/key for current file
 
 #### Interactive Commands
-- `:VaultEncryptPrompt` - Encrypt with vault ID prompt
+- `:VaultEncryptPrompt` - Encrypt with vault ID prompt:
 - `:VaultDecryptPrompt` - Decrypt with vault ID prompt
 
 ### Default Key Mappings
 
 #### Visual Mode (selection-based)
-- `<leader>ve` - Encrypt selection
-- `<leader>vd` - Decrypt selection
+- `<leader>ve` - Smart encrypt (auto-encrypts YAML values, full selection for others)
+- `<leader>vd` - Smart decrypt (auto-decrypts YAML values, full selection for others)
 - `<leader>vv` - View decrypted selection
+
+#### YAML-Specific Visual Mode
+- `<leader>vev` - Encrypt YAML value only (uses `encrypt_string`, preserves key structure)
+- `<leader>vdv` - Decrypt YAML value only (preserves key structure)
+- `<leader>vef` - Encrypt full selection (uses `encrypt`, original behavior)
+- `<leader>vdf` - Decrypt full selection (original behavior)
+- `<leader>vep` - Encrypt with prompt (override smart behavior)
+- `<leader>vdp` - Decrypt with prompt (override smart behavior)
 
 #### Normal Mode (file-based)
 - `<leader>vE` - Encrypt entire file
 - `<leader>vD` - Decrypt entire file
 - `<leader>vF` - Edit vault file (decrypt → edit → auto-encrypt)
 - `<leader>vR` - Rekey file
+
+#### Cursor-Based Mode (NEW!)
+- `<leader>vc` - Smart encrypt/decrypt YAML structure at cursor
+- `<leader>vec` - Encrypt YAML structure at cursor
+- `<leader>vdc` - Decrypt YAML structure at cursor
 
 #### Operator Mode (works with text objects)
 - `<leader>ve{motion}` - Encrypt text object (e.g., `<leader>veiw` for inner word)
@@ -149,14 +175,50 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 <leader>vei"
 ```
 
-#### 4. Viewing Vault Content
+#### 4. YAML-Aware Operations (NEW!)
+```vim
+" Smart mode (automatically encrypts values for YAML):
+" Select: database_password: "secret123"
+" Press <leader>ve (automatically encrypts just the value)
+" Result: database_password: "$ANSIBLE_VAULT;1.1;AES256;..."
+
+" Direct YAML value operations:
+" Select: api_key: "abc123"
+<leader>vev  " Encrypts only the value
+<leader>vdv  " Decrypts only the value
+
+" Override smart behavior with prompts:
+<leader>vep  " Prompts: Value only / Entire selection / Cancel
+<leader>vdp  " Prompts for decrypt preference
+
+" Preserves structure:
+" redis_host: localhost  # comment
+" becomes:
+" redis_host: "$ANSIBLE_VAULT;1.1;..." # comment
+```
+
+#### 5. Cursor-Based Operations (NEW!)
+```vim
+" Position cursor anywhere on a YAML key-value line:
+" cursor here → key: "secret"
+<leader>vc  " Auto-encrypts to: key: !vault | ...
+
+" Works with multi-line vault structures:
+" cursor here → key: !vault |
+"                 $ANSIBLE_VAULT;1.1;...
+<leader>vc  " Auto-decrypts back to: key: "secret"
+
+" No manual selection needed - plugin finds the complete structure!
+```
+
+#### 6. Viewing Vault Content
 ```vim
 " Select encrypted content and view it decrypted
 :'<,'>VaultView
 " Opens in a new buffer showing decrypted content
 ```
 
-#### 5. Using Vault IDs
+#### 6. Using Vault IDs
 ```vim
 " Encrypt with specific vault ID
 :'<,'>VaultEncryptPrompt
@@ -181,13 +243,18 @@ vim.g.ansible_vault_identity = 'default@~/.ansible/vault_pass'
 
 ### Managing Mixed Content Files
 ```vim
-" For files with both encrypted and plain text:
+" YAML-aware approach (recommended):
+" 1. Select a YAML line like: password: "secret123"
+" 2. Press <leader>vev to encrypt only the value
+" 3. Result: password: "$ANSIBLE_VAULT;1.1;..."
+" 4. To decrypt: select the line, press <leader>vdv
 
+" Traditional approach:
 " 1. Select only the encrypted portion
-" 2. Press <leader>vd to decrypt just that section
+" 2. Press <leader>vdf to decrypt just that section
 " 3. Edit the decrypted content
 " 4. Select the modified section
-" 5. Press <leader>ve to re-encrypt
+" 5. Press <leader>vef to re-encrypt
 ```
 
 ### Quick Content Inspection
@@ -230,6 +297,22 @@ chmod 600 ~/.ansible/vault_pass
 
 # Configure in Neovim
 let g:ansible_vault_password_file = '~/.ansible/vault_pass'
+```
+
+### Vault ID Configuration Issues
+
+If you get "vault-ids default,default available" error:
+
+```vim
+" Option 1: Use password file only (recommended for single vault)
+let g:ansible_vault_password_file = '~/.ansible/vault_pass'
+" Don't set g:ansible_vault_identity
+
+" Option 2: Use specific vault identity
+let g:ansible_vault_identity = 'prod@~/.ansible/prod_pass'
+
+" Option 3: Use interactive prompts for multiple vaults
+" Use :VaultEncryptPrompt and :VaultDecryptPrompt commands
 ```
 
 ### Multiple Vault IDs
