@@ -37,12 +37,12 @@ jobs:
     - name: Run integration tests
       run: |
         echo "Running integration tests..."
-        nvim --headless -S tests/integration_test.lua
+        nvim --headless -c "set runtimepath+=$PWD" -S tests/integration_test.lua
 
     - name: Run quick validation
       run: |
         echo "Running quick validation..."
-        nvim --headless -S tests/quick_test.lua
+        nvim --headless -c "set runtimepath+=$PWD" -S tests/quick_test.lua
 
     - name: Run full test suite
       run: ./test_runner.sh

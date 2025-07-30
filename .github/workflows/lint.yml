@@ -23,13 +23,13 @@ jobs:
     - name: Check Lua syntax
       run: |
         echo "Checking Lua file syntax..."
-        nvim --headless -c "luafile lua/ansible-vault.lua" -c "qa"
+        nvim --headless -c "set runtimepath+=$PWD" -c "luafile lua/ansible-vault.lua" -c "qa"
         echo "✅ Lua syntax is valid"
-
-    - name: Check Vim syntax
+        
+    - name: Check Vim syntax  
       run: |
         echo "Checking Vim file syntax..."
-        nvim --headless -c "source plugin/ansible-vault.vim" -c "qa"
+        nvim --headless -c "set runtimepath+=$PWD" -c "source plugin/ansible-vault.vim" -c "qa"
         echo "✅ Vim syntax is valid"
 
     - name: Validate README structure
