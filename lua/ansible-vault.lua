@@ -508,6 +508,21 @@ local function parse_yaml_line(content)
   return nil
 end
 
+-- Ensure proper spacing before comments
+local function ensure_comment_spacing(suffix)
+  if suffix and suffix ~= '' then
+    -- If suffix starts with # but doesn't have a space before it, add one
+    if suffix:match('^#') then
+      return ' ' .. suffix
+    end
+    -- If suffix doesn't start with whitespace and contains #, ensure space before #
+    if not suffix:match('^%s') and suffix:match('#') then
+      return ' ' .. suffix
+    end
+  end
+  return suffix or ''
+end
+
 -- Reconstruct YAML line with new value
 local function reconstruct_yaml_line(parsed, new_value, original_was_quoted)
   if not parsed then return nil end
@@ -522,13 +537,16 @@ local function reconstruct_yaml_line(parsed, new_value, original_was_quoted)
     new_value = new_value:gsub('"', '\\"')
   end
 
+  -- Ensure proper comment spacing
+  local safe_suffix = ensure_comment_spacing(parsed.suffix)
+
   return string.format('%s%s: %s%s%s%s',
     parsed.indent,
     parsed.key,
     quote_char,
     new_value,
     quote_char,
-    parsed.suffix
+    safe_suffix
   )
 end
 
@@ -942,7 +960,7 @@ function M.encrypt_yaml_value(line1, line2)
     return
   end
 
-  local parsed = parse_yaml_line(content:match('^%s*(.-)%s*$'))
+  local parsed = parse_yaml_line(content:match('^(.-)%s*$'))
   if not parsed then
     vim.api.nvim_echo({{'Error: Could not parse YAML line', 'ErrorMsg'}}, true, {})
     return
@@ -974,7 +992,8 @@ function M.encrypt_yaml_value(line1, line2)
       local new_lines = {}
 
       -- First line: key: !vault |
-      table.insert(new_lines, parsed.indent .. parsed.key .. ': ' .. vault_lines[1] .. parsed.suffix)
+      local safe_suffix = ensure_comment_spacing(parsed.suffix)
+      table.insert(new_lines, parsed.indent .. parsed.key .. ': ' .. vault_lines[1] .. safe_suffix)
 
       -- Subsequent lines: indented vault content
       for i = 2, #vault_lines do
@@ -1033,7 +1052,7 @@ function M.decrypt_yaml_value(line1, line2)
     return
   end
 
-  local parsed = parse_yaml_line(content:match('^%s*(.-)%s*$'))
+  local parsed = parse_yaml_line(content:match('^(.-)%s*$'))
   if not parsed then
     vim.api.nvim_echo({{'Error: Could not parse YAML line', 'ErrorMsg'}}, true, {})
     return
@@ -1083,7 +1102,8 @@ function M.decrypt_yaml_value(line1, line2)
         -- Multi-line decrypted content, recreate as YAML multi-line
         local lines = vim.split(decrypted_value, '\n')
         local new_lines = {}
-        table.insert(new_lines, parsed.indent .. parsed.key .. ': |' .. parsed.suffix)
+        local safe_suffix = ensure_comment_spacing(parsed.suffix)
+        table.insert(new_lines, parsed.indent .. parsed.key .. ': |' .. safe_suffix)
         for _, line in ipairs(lines) do
           table.insert(new_lines, parsed.indent .. '  ' .. line)
         end
@@ -1091,7 +1111,8 @@ function M.decrypt_yaml_value(line1, line2)
         replace_range(line1, line2, new_content)
       else
         -- Single-line decrypted content
-        local new_line = parsed.indent .. parsed.key .. ': "' .. decrypted_value .. '"' .. parsed.suffix
+        local safe_suffix = ensure_comment_spacing(parsed.suffix)
+        local new_line = parsed.indent .. parsed.key .. ': "' .. decrypted_value .. '"' .. safe_suffix
         replace_range(line1, line2, new_line)
       end
       vim.api.nvim_echo({{'YAML value decrypted successfully!', 'Normal'}}, true, {})
@@ -1101,7 +1122,8 @@ function M.decrypt_yaml_value(line1, line2)
         -- Reconstruct multi-line format
         local lines = vim.split(decrypted_value, '\n')
         local new_lines = {}
-        table.insert(new_lines, parsed.indent .. parsed.key .. ': |' .. parsed.suffix)
+        local safe_suffix = ensure_comment_spacing(parsed.suffix)
+        table.insert(new_lines, parsed.indent .. parsed.key .. ': |' .. safe_suffix)
         for _, line in ipairs(lines) do
           table.insert(new_lines, parsed.indent .. '  ' .. line)
         end
@@ -1368,8 +1390,15 @@ function M.smart_at_cursor()
     return
   end
 
-  -- Check if it's encrypted and choose appropriate action
-  if is_vault_encrypted(structure.content) then
+  -- Parse the YAML to check if the VALUE is encrypted, not the whole structure
+  local parsed = parse_yaml_line(structure.content:match('^(.-)%s*$'))
+  if not parsed then
+    vim.api.nvim_echo({{'Error: Could not parse YAML structure', 'ErrorMsg'}}, true, {})
+    return
+  end
+
+  -- Check if the value (not the whole structure) is encrypted and choose appropriate action
+  if is_vault_encrypted(parsed.value) then
     M.decrypt_at_cursor()
   else
     M.encrypt_at_cursor()

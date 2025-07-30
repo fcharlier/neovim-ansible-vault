@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.1.2] - 2025-07-30
+
+### Fixed
+- **CRITICAL: Fixed indentation loss in nested YAML structures**
+  - Cursor-based operations (`<leader>vc`) now preserve original YAML indentation
+  - Fixed `decrypt_yaml_value()` and `encrypt_yaml_value()` to maintain leading whitespace
+  - Nested structures like `environments.production.database.password` maintain proper spacing
+- **Fixed invalid YAML output due to comment spacing**
+  - Added `ensure_comment_spacing()` helper to guarantee proper spacing before `#` comments
+  - All reconstruction functions now ensure at least one space before inline comments
+  - Prevents invalid YAML like `password: "value"#comment` → generates `password: "value" #comment`
+- **Improved vault encryption detection logic**
+  - `smart_at_cursor()` now correctly detects encryption status of YAML values (not entire structures)
+  - Fixed false positives where `!vault` indicator in structure was mistaken for encrypted content
+  - Cursor-based encrypt/decrypt now works reliably with nested vault content
+
+### Enhanced
+- Updated nested examples file with comprehensive test cases for indentation and comment preservation
+- Added comment spacing validation examples to demonstrate proper YAML formatting
+
 ## [1.1.1] - 2025-07-29
 
 ### Fixed

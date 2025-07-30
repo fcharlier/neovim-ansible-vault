@@ -1,0 +1,160 @@
+# Nested YAML Structure Examples for Ansible Vault Plugin
+# This file demonstrates the plugin's ability to handle complex nested structures
+# and preserve indentation correctly
+
+---
+# Example 1: Simple nested structure
+app_config:
+  name: "my-application"
+  database:
+    host: "localhost"
+    port: 5432
+    username: "db_user"
+    password: "secret_db_password"  # Try <leader>vc here to encrypt this value
+  redis:
+    host: "redis.example.com"
+    port: 6379
+    auth_token: "redis_secret_token"  # Try <leader>vc here too
+  cache:
+    timeout: 300# Comment without space - plugin will fix this
+
+# Example 2: Deeply nested structure
+environments:
+  production:
+    aws:
+      region: "us-west-2"
+      credentials:
+        access_key: "AKIAI44QH8DHBEXAMPLE"  # Encrypt this with <leader>vc
+        secret_key: "je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY"  # And this
+      s3:
+        bucket_name: "prod-app-bucket"
+        encryption: true
+    database:
+      host: "prod-db.company.com"
+      credentials:
+        username: "prod_user"
+        password: "ultra_secure_prod_password"  # <leader>vc to encrypt
+        ssl_cert: |
+          -----BEGIN CERTIFICATE-----
+          MIIDQTCCAimgAwIBAgITBmyfz5m/jAo54vB4ikPmljZbyjANBgkqhkiG9w0BAQsF
+          ADA5MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6
+          -----END CERTIFICATE-----
+  staging:
+    aws:
+      region: "us-east-1"
+      credentials:
+        access_key: "AKIAI44QH8DHBSTAGING"
+        secret_key: "staging_secret_key_here"  # Test cursor-based encryption
+    database:
+      host: "staging-db.company.com"
+      credentials:
+        username: "staging_user"
+        password: "staging_password_123"
+
+# Example 3: Mixed encrypted/unencrypted in nested structure
+application_secrets:
+  third_party_apis:
+    stripe:
+      public_key: "pk_test_51234567890"  # This could stay unencrypted
+      secret_key: "sk_test_stripe_secret_key_here"  # Use <leader>vc to encrypt this
+    github:
+      org_name: "my-company"
+      oauth_app:
+        client_id: "Iv1.1234567890abcdef"  # Public, doesn't need encryption
+        client_secret: "github_oauth_secret_here"  # <leader>vc to encrypt this
+    slack:
+      workspace: "my-team"
+      webhook_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+
+# Example 4: Array structures with nested elements
+users:
+  - name: "admin"
+    role: "administrator"
+    credentials:
+      username: "admin"
+      password: "admin_super_secret"  # Position cursor here and use <leader>vc
+      api_tokens:
+        - name: "primary"
+          token: "admin_token_primary_123"  # Encrypt this value
+        - name: "backup"
+          token: "admin_token_backup_456"   # And this one too
+  - name: "service_account"
+    role: "service"
+    credentials:
+      username: "svc_account"
+      password: "service_account_password"
+      certificates:
+        private_key: |
+          -----BEGIN PRIVATE KEY-----
+          MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKB
+          wUDdVAwx0JmNBvRWuKqjOcNDNE6jMZIMnLtY4+RzjIAFf7n1EtR8RQzqKkJMi3Zm
+          -----END PRIVATE KEY-----
+
+# Example 5: Complex configuration with multiple nesting levels
+microservices:
+  auth_service:
+    deployment:
+      image: "auth-service:v1.2.3"
+      port: 8080
+      environment:
+        NODE_ENV: "production"
+        JWT_SECRET: "jwt_signing_secret_key_here"  # Use <leader>vc to encrypt
+        DATABASE_URL: "postgresql://user:pass@db:5432/auth"  # Encrypt this too
+    scaling:
+      min_replicas: 3
+      max_replicas: 10
+      cpu_threshold: 70
+  user_service:
+    deployment:
+      image: "user-service:v2.1.0"
+      port: 8081
+      environment:
+        NODE_ENV: "production"
+        REDIS_PASSWORD: "redis_connection_secret"  # Cursor-based encryption test
+        EMAIL_API_KEY: "sendgrid_api_key_secret"   # Another encryption target
+    external_apis:
+      sendgrid:
+        api_key: "SG.1234567890abcdef.ghijklmnopqrstuvwxyz"
+        from_email: "noreply@company.com"
+      twilio:
+        account_sid: "AC1234567890abcdef"  # Could remain unencrypted
+        auth_token: "twilio_auth_token_secret"  # Should be encrypted
+
+# Example 6: Comment spacing test cases
+comment_spacing_tests:
+  proper_spacing: "value"  # This has proper spacing
+  no_spacing: "value"# This has no space before comment
+  multiple_spaces: "value"   # This has multiple spaces
+
+# Instructions for testing nested structure encryption:
+#
+# 1. CURSOR-BASED OPERATIONS (Recommended for nested structures):
+#    - Position your cursor anywhere on a line with a secret value
+#    - Press <leader>vc (VaultSmartAtCursor) to auto-encrypt/decrypt
+#    - The plugin will preserve the exact indentation of nested structures
+#
+# 2. Test indentation preservation:
+#    - Try encrypting/decrypting values at different nesting levels
+#    - Notice how the indentation is maintained correctly
+#    - Example: cursor on "password: 'secret_db_password'" → <leader>vc
+#    - Result: "password: !vault |" with properly indented vault content
+#
+# 3. Mixed content handling:
+#    - Some values should be encrypted (passwords, tokens, keys)
+#    - Others can remain plain text (usernames, URLs, port numbers)
+#    - The plugin intelligently handles both cases in nested structures
+#
+# 4. Multi-line content:
+#    - SSL certificates and private keys work well with vault encryption
+#    - Position cursor on the line starting with the key name
+#    - Use <leader>vc to encrypt the entire multi-line block
+#
+# 5. Deep nesting verification:
+#    - Test encryption at various nesting levels (2, 3, 4+ levels deep)
+#    - Verify that indentation is preserved at each level
+#    - Example: environments.production.database.credentials.password
+#
+# 6. Comment spacing verification:
+#    - Test with values that have inline comments (see Example 6 above)
+#    - Plugin automatically ensures proper spacing before # character
+#    - Original: password: "secret"#comment → Fixed: password: "encrypted" # comment
