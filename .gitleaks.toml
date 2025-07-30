@@ -1,0 +1,9 @@
+[allowlist]
+  description = "Project Allowlist"
+
+  paths = [
+    # Ignore example files
+    '''examples\/.*''',
+    # Ignore tests
+    '''tests\/*''',
+  ]
