@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.1.4] - 2025-07-30
+
+### Added
+- **GitHub Actions CI/CD pipeline for automated testing and validation**
+  - Added `.github/workflows/test.yml` - Comprehensive test suite running on Neovim stable and nightly
+  - Added `.github/workflows/lint.yml` - Code quality checks, syntax validation, and structure verification
+  - Multi-version compatibility testing ensures plugin works across Neovim versions
+  - Automated syntax validation for Lua and Vim files on every PR
+  - Integration test execution with 24+ function coverage validation
+  - README structure validation and examples directory verification
+- **Contributor and maintainer tools**
+  - Added `.github/pull_request_template.md` - Structured PR guidelines with testing checklist
+  - Added `.github/CONTRIBUTING.md` - Comprehensive development guide and contribution workflow
+  - Clear testing requirements and code quality standards
+  - Automated artifact collection for debugging failed tests
+
+### Enhanced
+- **Development workflow automation**
+  - Pull requests automatically validated before merge
+  - Code quality gates prevent debug statements and syntax errors
+  - Multi-platform testing ensures broad compatibility
+  - Clear feedback loop for contributors with detailed check descriptions
+
+## [1.1.3] - 2025-07-30
+
+### Added
+- **Comprehensive test suite for major plugin features**
+  - Added `tests/integration_test.lua` - Full integration test coverage for all public APIs
+  - Added `tests/quick_test.lua` - Fast validation test for core functionality
+  - Added `test_runner.sh` - Automated test runner with syntax validation and coverage reporting
+  - Tests cover: module loading, API availability, buffer operations, cursor functionality, debug features
+- **Test infrastructure and CI support**
+  - Automated syntax validation for Lua and Vim files
+  - Test coverage reporting (24 public functions, 16 local functions)
+  - Error-free test execution with proper error handling
+  - Support for both standalone and CI environments
+
+### Enhanced
+- **Plugin reliability and maintenance**
+  - Added comprehensive error handling validation
+  - Verified all critical functions are accessible and functional
+  - Added buffer operation safety tests
+  - Enhanced debug functionality validation
+
 ## [1.1.2] - 2025-07-30
 
 ### Fixed
