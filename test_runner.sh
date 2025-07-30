@@ -35,7 +35,7 @@ run_integration_tests() {
     echo -e "\n${YELLOW}Running integration tests...${NC}"
 
     # Run our proven integration test
-    if nvim --headless -S tests/integration_test.lua 2>/dev/null; then
+    if nvim --headless -c "set runtimepath+=$PWD" -S tests/integration_test.lua 2>/dev/null; then
         echo -e "${GREEN}✓ Integration tests passed${NC}"
     else
         echo -e "${RED}✗ Integration tests failed${NC}"
@@ -44,7 +44,7 @@ run_integration_tests() {
 
     # Run quick validation test
     echo -e "\n${YELLOW}Running quick validation...${NC}"
-    if nvim --headless -S tests/quick_test.lua 2>/dev/null; then
+    if nvim --headless -c "set runtimepath+=$PWD" -S tests/quick_test.lua 2>/dev/null; then
         echo -e "${GREEN}✓ Quick validation passed${NC}"
     else
         echo -e "${RED}✗ Quick validation failed${NC}"
@@ -104,7 +104,7 @@ else
 fi
 EOF
 
-    nvim --headless -S /tmp/test_runner.lua
+    nvim --headless -c "set runtimepath+=$PWD" -S /tmp/test_runner.lua
     local exit_code=$?
     rm -f /tmp/test_runner.lua
     return $exit_code
@@ -135,7 +135,7 @@ validate_syntax() {
     echo -e "\n${YELLOW}Validating plugin syntax...${NC}"
 
     # Check main lua file
-    if nvim --headless -c "luafile lua/ansible-vault.lua" -c "qa" 2>/dev/null; then
+    if nvim --headless -c "set runtimepath+=$PWD" -c "luafile lua/ansible-vault.lua" -c "qa" 2>/dev/null; then
         echo -e "${GREEN}✓ lua/ansible-vault.lua syntax valid${NC}"
     else
         echo -e "${RED}✗ lua/ansible-vault.lua syntax error${NC}"
@@ -143,7 +143,7 @@ validate_syntax() {
     fi
 
     # Check vim plugin file
-    if nvim --headless -c "source plugin/ansible-vault.vim" -c "qa" 2>/dev/null; then
+    if nvim --headless -c "set runtimepath+=$PWD" -c "source plugin/ansible-vault.vim" -c "qa" 2>/dev/null; then
         echo -e "${GREEN}✓ plugin/ansible-vault.vim syntax valid${NC}"
     else
         echo -e "${RED}✗ plugin/ansible-vault.vim syntax error${NC}"
