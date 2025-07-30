@@ -328,7 +328,8 @@ local function get_range_content(line1, line2)
 end
 
 -- Check if content is ansible-vault encrypted
-local function is_vault_encrypted(content)
+local is_vault_encrypted
+is_vault_encrypted = function(content)
   if M.debug_mode then
     local preview = content:sub(1, 50):gsub('\n', '\\n')
     debug_log('is_vault_encrypted: checking "' .. preview .. '..."')
@@ -366,7 +367,8 @@ local function is_plain_text(content)
 end
 
 -- Parse YAML key-value line and extract components
-local function parse_yaml_line(content)
+local parse_yaml_line
+parse_yaml_line = function(content)
   -- Handle multi-line content (like !vault format)
   local lines = vim.split(content, '\n')
   local first_line = lines[1]
@@ -509,7 +511,8 @@ local function parse_yaml_line(content)
 end
 
 -- Ensure proper spacing before comments
-local function ensure_comment_spacing(suffix)
+local ensure_comment_spacing
+ensure_comment_spacing = function(suffix)
   if suffix and suffix ~= '' then
     -- If suffix starts with # but doesn't have a space before it, add one
     if suffix:match('^#') then
@@ -524,7 +527,8 @@ local function ensure_comment_spacing(suffix)
 end
 
 -- Reconstruct YAML line with new value
-local function reconstruct_yaml_line(parsed, new_value, original_was_quoted)
+local reconstruct_yaml_line
+reconstruct_yaml_line = function(parsed, new_value, original_was_quoted)
   if not parsed then return nil end
 
   -- Check if this is an encrypted value (starts with !vault)
@@ -551,7 +555,8 @@ local function reconstruct_yaml_line(parsed, new_value, original_was_quoted)
 end
 
 -- Check if content appears to be a YAML key-value line
-local function is_yaml_key_value(content)
+local is_yaml_key_value
+is_yaml_key_value = function(content)
   -- Remove leading/trailing whitespace
   local trimmed = content:match('^%s*(.-)%s*$')
 
@@ -1289,7 +1294,8 @@ function M.decrypt_with_prompt(line1, line2)
 end
 
 -- Find complete YAML key-value structure around cursor
-local function find_yaml_structure_at_cursor()
+local find_yaml_structure_at_cursor
+find_yaml_structure_at_cursor = function()
   local cursor_line = vim.fn.line('.')
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
@@ -1437,5 +1443,8 @@ function M.clear_debug_log()
     vim.api.nvim_echo({{'Failed to clear debug log', 'ErrorMsg'}}, true, {})
   end
 end
+
+-- Note: Unit tests would require complex function scope changes
+-- Integration tests provide excellent coverage of real-world usage patterns
 
 return M

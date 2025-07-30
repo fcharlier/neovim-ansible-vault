@@ -1,0 +1,60 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Neovim for syntax checking
+      uses: rhysd/action-setup-vim@v1
+      with:
+        neovim: true
+        version: stable
+
+    - name: Check Lua syntax
+      run: |
+        echo "Checking Lua file syntax..."
+        nvim --headless -c "luafile lua/ansible-vault.lua" -c "qa"
+        echo "✅ Lua syntax is valid"
+
+    - name: Check Vim syntax
+      run: |
+        echo "Checking Vim file syntax..."
+        nvim --headless -c "source plugin/ansible-vault.vim" -c "qa"
+        echo "✅ Vim syntax is valid"
+
+    - name: Validate README structure
+      run: |
+        echo "Checking README structure..."
+        # Check for required sections
+        grep -q "## Features" README.md || (echo "❌ Missing Features section" && exit 1)
+        grep -q "## Installation" README.md || (echo "❌ Missing Installation section" && exit 1)
+        grep -q "## Usage" README.md || (echo "❌ Missing Usage section" && exit 1)
+        grep -q "## Testing" README.md || (echo "❌ Missing Testing section" && exit 1)
+        echo "✅ README structure is valid"
+
+    - name: Check for debug logging
+      run: |
+        echo "Checking for debug statements..."
+        if grep -n "print(" lua/ansible-vault.lua; then
+          echo "❌ Found debug print statements - please remove before merging"
+          exit 1
+        else
+          echo "✅ No debug statements found"
+        fi
+
+    - name: Validate examples directory
+      run: |
+        echo "Checking examples directory..."
+        [ -f "examples/nested-examples.yml" ] || (echo "❌ Missing nested examples" && exit 1)
+        [ -f "examples/test-vault.yml" ] || (echo "❌ Missing test vault examples" && exit 1)
+        echo "✅ Examples directory is valid"

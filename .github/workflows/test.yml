@@ -1,0 +1,61 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        neovim-version: ['stable', 'nightly']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Neovim
+      uses: rhysd/action-setup-vim@v1
+      with:
+        neovim: true
+        version: ${{ matrix.neovim-version }}
+
+    - name: Verify Neovim installation
+      run: |
+        nvim --version
+        which nvim
+
+    - name: Make test runner executable
+      run: chmod +x test_runner.sh
+
+    - name: Run syntax validation
+      run: ./test_runner.sh --syntax-only
+
+    - name: Run integration tests
+      run: |
+        echo "Running integration tests..."
+        nvim --headless -S tests/integration_test.lua
+
+    - name: Run quick validation
+      run: |
+        echo "Running quick validation..."
+        nvim --headless -S tests/quick_test.lua
+
+    - name: Run full test suite
+      run: ./test_runner.sh
+
+    - name: Check test coverage
+      run: ./test_runner.sh --coverage-only
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.neovim-version }}
+        path: |
+          test_runner.sh
+          tests/
+        retention-days: 30
