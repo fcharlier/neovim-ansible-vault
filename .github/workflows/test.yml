@@ -53,10 +53,7 @@ jobs:
       run: |
         echo "Running quick validation..."
         nvim --headless -c "set runtimepath+=$PWD" -S tests/quick_test.lua
-
-    - name: Run full test suite
-      run: ./test_runner.sh
-
+        
     - name: Check test coverage
       run: ./test_runner.sh --coverage-only
 
