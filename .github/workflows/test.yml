@@ -22,7 +22,7 @@ jobs:
       with:
         neovim: true
         version: ${{ matrix.neovim-version }}
-        
+
     - name: Install ansible-vault
       run: |
         sudo apt update
@@ -32,7 +32,7 @@ jobs:
       run: |
         nvim --version
         which nvim
-        
+
     - name: Verify ansible-vault installation
       run: |
         ansible-vault --version
@@ -53,7 +53,7 @@ jobs:
       run: |
         echo "Running quick validation..."
         nvim --headless -c "set runtimepath+=$PWD" -S tests/quick_test.lua
-        
+
     - name: Check test coverage
       run: ./test_runner.sh --coverage-only
 
